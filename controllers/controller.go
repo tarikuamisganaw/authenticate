@@ -9,10 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"golang.org/x/crypto/bcrypt"
 )
-
-// controllers/controller.go
 
 func Register(c *gin.Context) {
 	var user models.User
@@ -21,25 +18,15 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	// Hash the password
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
-		return
-	}
-	user.Password = string(hashedPassword)
-
-	// Save the user in the database
-	err = data.CreateUser(user)
+	err := data.RegisterUser(user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "User registered successfully"})
+	c.JSON(http.StatusCreated, gin.H{"message": "User registered successfully"})
 }
 
-// controllers/controller.go
 func Login(c *gin.Context) {
 	var user models.User
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -47,20 +34,14 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	log.Println("Login attempt for user:", user.Username)
-
 	authenticatedUser, err := data.AuthenticateUser(user.Username, user.Password)
 	if err != nil {
-		log.Println("Authentication failed:", err)
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 
-	log.Println("User authenticated:", authenticatedUser.Username)
-
 	token, err := middleware.GenerateJWT(authenticatedUser.Username, authenticatedUser.Role)
 	if err != nil {
-		log.Println("Error generating token:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -68,17 +49,17 @@ func Login(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"token": token})
 }
 
-// controllers/controller.go
-func GetAllUsers(c *gin.Context) {
-	users, err := data.GetAllUsers()
+func GetUsers(c *gin.Context) {
+	users, err := data.GetUsers()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
 	c.JSON(http.StatusOK, users)
 }
 
-// Existing task controller functions (CreateTask, GetTasks, GetTask, UpdateTask, DeleteTask) go here
+// Task handlers here...
 func CreateTask(c *gin.Context) {
 	var task models.Task
 	if err := c.ShouldBindJSON(&task); err != nil {

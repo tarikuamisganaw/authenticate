@@ -7,30 +7,24 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// router/router.go
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
 
-	// Public routes
-	r.POST("/api/register", controllers.Register)
-	r.POST("/api/login", controllers.Login)
+	r.POST("/register", controllers.Register)
+	r.POST("/login", controllers.Login)
 
-	// Protected routes
 	auth := r.Group("/api")
-	auth.Use(middleware.AuthMiddleware())
+	auth.Use(middleware.JWTAuthMiddleware())
 	{
+		// Example task endpoint
+		auth.GET("/users", middleware.AdminOnlyMiddleware(), controllers.GetUsers)
 		auth.POST("/tasks", controllers.CreateTask)
 		auth.GET("/tasks", controllers.GetTasks)
 		auth.GET("/tasks/:id", controllers.GetTaskByID)
 		auth.PUT("/tasks/:id", controllers.UpdateTask)
 		auth.DELETE("/tasks/:id", controllers.DeleteTask)
+		
 
-		// Admin only route
-		admin := auth.Group("/admin")
-		admin.Use(middleware.AdminMiddleware())
-		{
-			admin.GET("/users", controllers.GetAllUsers)
-		}
 	}
 
 	return r

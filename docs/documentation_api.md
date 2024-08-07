@@ -1,4 +1,6 @@
 # Task Management API Documentation
+This is the link for the postman api documenation:
+https://documenter.getpostman.com/view/37345989/2sA3rzKYbas
 
 ## Endpoints
 
@@ -44,6 +46,8 @@
 
 ### Admin Endpoints
 - **Admin-specific routes**
+### Users
+-**Get /api/users**
 
 ## Authentication and Authorization
 - Use the `Authorization` header to send the JWT token.
